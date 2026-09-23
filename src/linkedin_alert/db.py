@@ -15,7 +15,9 @@ CREATE TABLE IF NOT EXISTS jobs (
     location TEXT NOT NULL,
     url TEXT NOT NULL,
     first_seen_at TEXT NOT NULL,
-    notified_at TEXT
+    notified_at TEXT,
+    applicants TEXT NOT NULL DEFAULT '',
+    opened_at TEXT NOT NULL DEFAULT ''
 );
 """
 
@@ -25,6 +27,7 @@ def connect(database: Path) -> sqlite3.Connection:
     conn = sqlite3.connect(database)
     conn.row_factory = sqlite3.Row
     conn.execute(SCHEMA)
+    _ensure_job_columns(conn)
     return conn
 
 
@@ -35,11 +38,22 @@ def upsert_jobs(conn: sqlite3.Connection, jobs: list[Job]) -> list[Job]:
     for job in jobs:
         cur = conn.execute(
             """
-            INSERT OR IGNORE INTO jobs
-                (linkedin_id, title, company, location, url, first_seen_at)
-            VALUES (?, ?, ?, ?, ?, ?)
+            INSERT OR IGNORE INTO jobs (
+                linkedin_id, title, company, location, url, first_seen_at,
+                applicants, opened_at
+            )
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
             """,
-            (job.linkedin_id, job.title, job.company, job.location, job.url, now),
+            (
+                job.linkedin_id,
+                job.title,
+                job.company,
+                job.location,
+                job.url,
+                now,
+                job.applicants,
+                job.opened_at,
+            ),
         )
         if cur.rowcount:
             inserted.append(job)
@@ -50,7 +64,7 @@ def upsert_jobs(conn: sqlite3.Connection, jobs: list[Job]) -> list[Job]:
 def pending_jobs(conn: sqlite3.Connection) -> list[Job]:
     rows = conn.execute(
         """
-        SELECT linkedin_id, title, company, location, url
+        SELECT linkedin_id, title, company, location, url, applicants, opened_at
         FROM jobs
         WHERE notified_at IS NULL
         ORDER BY id
@@ -63,6 +77,8 @@ def pending_jobs(conn: sqlite3.Connection) -> list[Job]:
             company=row["company"],
             location=row["location"],
             url=row["url"],
+            applicants=row["applicants"],
+            opened_at=row["opened_at"],
         )
         for row in rows
     ]
@@ -77,6 +93,14 @@ def mark_notified(conn: sqlite3.Connection, linkedin_ids: list[str]) -> None:
         [(now, job_id) for job_id in linkedin_ids],
     )
     conn.commit()
+
+
+def _ensure_job_columns(conn: sqlite3.Connection) -> None:
+    columns = {row[1] for row in conn.execute("PRAGMA table_info(jobs)")}
+    if "applicants" not in columns:
+        conn.execute("ALTER TABLE jobs ADD COLUMN applicants TEXT NOT NULL DEFAULT ''")
+    if "opened_at" not in columns:
+        conn.execute("ALTER TABLE jobs ADD COLUMN opened_at TEXT NOT NULL DEFAULT ''")
 
 
 def _now() -> str:

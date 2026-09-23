@@ -8,3 +8,5 @@ class Job:
     company: str
     location: str
     url: str
+    applicants: str = ""
+    opened_at: str = ""
