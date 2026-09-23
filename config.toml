@@ -13,13 +13,24 @@ country = "Brasil"
 # ID geográfico do LinkedIn (Brasil = 106057199)
 geo_id = "106057199"
 
-# Modalidade: remote | hybrid | onsite
-# remote → f_WT=2
-workplace = "remote"
+# Modalidade: remote | hybrid | onsite | any
+# remote → f_WT=2; any → não envia f_WT
+workplace = "any"
 
 # Recência: 1h | 12h | 24h | week
-# 1h → f_TPR=r3600
+# 1h → f_TPR=r3600 | 12h → f_TPR=r43200 | 24h → f_TPR=r86400 | week → f_TPR=r604800
 recency = "1h"
+# URL completa usada no filtro:
+# https://www.linkedin.com/jobs/search-results/?currentJobId=4468921714&keywords=laravel&origin=SEMANTIC_SEARCH_JOB_ALERT_IN_APP_NOTIFICATION&originToLandingJobPostings=4468921714%2C4470662296%2C4468939639&geoId=106057199&f_TPR=a1790071915-
+
+# Salário: token do f_SAL, ou vazio para não filtrar.
+# Ignorado quando search_url está preenchida.
+# f_SA_id_225001:272001 → f_SAL=f_SA_id_225001:272001
+salary = ""
+
+# URL exata da busca. Scraper e WhatsApp usam este valor, sem remontar a query.
+# f_TPR=a1790071915- → desde 22/09/2026 07:11 (America/Sao_Paulo)
+search_url = "https://www.linkedin.com/jobs/search-results/?currentJobId=4468921714&keywords=laravel&origin=SEMANTIC_SEARCH_JOB_ALERT_IN_APP_NOTIFICATION&originToLandingJobPostings=4468921714%2C4470662296%2C4468939639&geoId=106057199&f_TPR=a1790071915-"
 
 [whatsapp]
 # Número com DDI, só dígitos (Brasil 55 + DDD + número)
