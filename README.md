@@ -85,9 +85,9 @@ python -m linkedin_alert.cron --print    # só mostra a linha
 python -m linkedin_alert.cron --install  # grava no crontab do usuário
 ```
 
-A linha usa `systemd-inhibit` (a busca em andamento não é suspensa por inatividade), `flock` (não abre dois Playwright), `TZ=America/Sao_Paulo` e redireciona para `data/cron.log`.
+A linha usa `flock` (não abre dois Playwright), `TZ=America/Sao_Paulo` e redireciona para `data/cron.log`.
 
-O bloco do crontab também segura um inibidor de repouso desde o boot. Com ele ativo, o computador inativo não suspende sozinho, e a busca das 30 minutos continua. Fechar a tampa ainda pode suspender. No modo bateria, isso impede o descanso automático.
+O cron não consegue segurar o repouso: o `systemd-inhibit` pede senha interativa e, se falha, a busca nem começa. Quem impede o computador inativo de suspender é a unidade de usuário `linkedin-alert-awake` (bloqueio de `sleep` e `idle`). Fechar a tampa ainda pode suspender. No modo bateria, esse bloqueio impede o descanso automático.
 
 ## Mensagem no WhatsApp
 
