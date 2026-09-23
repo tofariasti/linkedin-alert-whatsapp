@@ -2,6 +2,7 @@ from linkedin_alert.config import Filters
 from linkedin_alert.models import Job
 from linkedin_alert.whatsapp import (
     MAX_MESSAGE_CHARS,
+    _callmebot_accepted,
     format_filter_block,
     format_job_messages,
     format_no_new_jobs,
@@ -50,6 +51,13 @@ def test_single_job_title(filters: Filters, sample_jobs: list[Job]) -> None:
     messages = format_job_messages(filters, sample_jobs[:1])
     assert "*1 vaga nova*" in messages[0]
     assert "vagas novas" not in messages[0]
+
+
+def test_callmebot_accepts_only_queued_success() -> None:
+    queued = "<b>Message queued.</b>"
+    assert _callmebot_accepted(200, queued)
+    assert not _callmebot_accepted(503, "Too many requests")
+    assert not _callmebot_accepted(203, "<p>Message to: +55</p>")
 
 
 def test_no_new_jobs_message(filters: Filters) -> None:

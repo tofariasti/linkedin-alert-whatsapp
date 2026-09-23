@@ -99,15 +99,17 @@ def send_message(phone: str, api_key: str, text: str) -> None:
         timeout=30,
     )
     body = (response.text or "").strip()
-    body_l = body.lower()
-    failed = response.status_code >= 400 or any(
-        token in body_l
-        for token in ("invalid", "not authorized", "apikey is", "wrong", "missing")
-    )
-    if failed and "queued" not in body_l and "success" not in body_l:
+    if not _callmebot_accepted(response.status_code, body):
         msg = f"CallMeBot HTTP {response.status_code}: {body[:300]}"
         raise WhatsAppError(msg)
     logger.info("CallMeBot OK (%s chars): %s", len(text), body[:200])
+
+
+def _callmebot_accepted(status_code: int, body: str) -> bool:
+    if status_code >= 400:
+        return False
+    low = body.lower()
+    return "queued" in low or "success" in low
 
 
 def send_messages(phone: str, api_key: str, texts: list[str]) -> int:
