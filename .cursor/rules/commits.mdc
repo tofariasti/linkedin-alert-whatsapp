@@ -1,0 +1,20 @@
+---
+description: Conventional Commits, um concern por commit
+alwaysApply: true
+---
+
+# Commits
+
+Usar Conventional Commits: `feat|fix|refactor|test|docs|chore`.
+
+- Um concern por commit (login ≠ db ≠ whatsapp ≠ testes)
+- Subject imperativo, ≤ ~72 chars, sem ponto final
+- Nunca `git add .` misturando concerns; nunca commitar `.env` ou `storage_state.json`
+
+```text
+# ❌ BAD
+git add . && git commit -m "wip everything"
+
+# ✅ GOOD
+feat(whatsapp): notify new jobs via CallMeBot
+```

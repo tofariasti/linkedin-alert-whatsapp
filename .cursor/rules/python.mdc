@@ -1,0 +1,23 @@
+---
+description: Convenções Python deste projeto (src-layout, Ruff, logging)
+globs: **/*.py
+alwaysApply: false
+---
+
+# Python
+
+- Pacote em `src/linkedin_alert/`. Entradas: `python -m linkedin_alert`, `.login`, `.cron`.
+- Type hints nos públicos. `logging` em vez de `print` (exceto progresso do login headed).
+- Settings só via `config.toml` + `.env` (`CALLMEBOT_APIKEY`). Não hardcodar filtros.
+- Sem login LinkedIn por email/senha e sem burlar CAPTCHA/2FA.
+
+```python
+# ❌ BAD
+print("achei vaga")
+os.environ["LINKEDIN_PASSWORD"] = "..."
+
+# ✅ GOOD
+logger.info("Extraídas %s vagas", len(jobs))
+```
+
+Ruff: `ruff check .` e `ruff format .`.
