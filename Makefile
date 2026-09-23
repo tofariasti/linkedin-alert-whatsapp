@@ -11,7 +11,7 @@ help:
 	@echo "make log           final de data/cron.log"
 	@echo "make db            últimas vagas em data/jobs.db"
 	@echo "make login         abre o LinkedIn e grava storage_state.json"
-	@echo "make cron          mostra a linha do crontab"
+	@echo "make cron          mostra o bloco do crontab"
 	@echo "make cron-install  grava a linha no crontab do usuário"
 	@echo "make check         ruff check e pytest"
 	@echo "make test          pytest"

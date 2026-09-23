@@ -5,6 +5,7 @@ Monitor local de vagas LinkedIn → WhatsApp (CallMeBot). Pacote `linkedin_alert
 ## Onde mudar o quê
 
 - Filtros, telefone, cron, paths, alerta de sessão: **somente** `config.toml` (local, gitignored). Modelo: [`config.example.toml`](config.example.toml)
+- `[schedule].cron` é uma expressão ou uma lista. Cada item vira uma linha do crontab. Janela atual: a cada 30 minutos, segunda a sábado, 08:00–20:00 (`America/Sao_Paulo`); domingo não roda. A segunda linha existe para a última execução ser 20:00, não 20:30. Depois de mudar, `python -m linkedin_alert.cron --install`
 - `search_url` preenchida é a URL da busca e do WhatsApp, sem remontar a query. Não descartar `origin`, `currentJobId` nem `f_TPR=a…-`
 - Segredo: `.env` (`CALLMEBOT_APIKEY`). Nunca commitar.
 - Sessão LinkedIn: `storage_state.json` via `python -m linkedin_alert.login`

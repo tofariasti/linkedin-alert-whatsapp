@@ -1,6 +1,6 @@
 # LinkedIn Alert → WhatsApp
 
-Monitor de vagas no LinkedIn, a cada 30 minutos. Roda no seu usuário (venv + cron), reutiliza uma sessão que você grava manualmente e avisa no WhatsApp via CallMeBot.
+Monitor de vagas no LinkedIn, a cada 30 minutos, de segunda a sábado, das 08:00 às 20:00. Roda no seu usuário (venv + cron), reutiliza uma sessão que você grava manualmente e avisa no WhatsApp via CallMeBot.
 
 Para mudar filtros, telefone ou recorrência do cron, edite só o `config.toml` (não vai para o git). O modelo é [`config.example.toml`](config.example.toml). Com `search_url` preenchida, a busca e o alerta usam essa URL completa. Os outros campos de `[filters]` não remontam a query.
 
@@ -81,11 +81,13 @@ python -m linkedin_alert
 ### 7. Cron (mesmo usuário do login, nunca root)
 
 ```bash
-python -m linkedin_alert.cron --print    # só mostra a linha
+python -m linkedin_alert.cron --print    # mostra o bloco
 python -m linkedin_alert.cron --install  # grava no crontab do usuário
 ```
 
-A linha usa `flock` (não abre dois Playwright), `TZ=America/Sao_Paulo` e redireciona para `data/cron.log`.
+A janela está em `[schedule]` do `config.toml`: a cada 30 minutos, de segunda a sábado, das 08:00 às 20:00, no fuso `America/Sao_Paulo`. Domingo não dispara. São duas expressões (`*/30 8-19 * * 1-6` e `0 20 * * 1-6`) para a última execução do dia ser 20:00. Uma expressão só, com a hora 20, também rodaria às 20:30.
+
+`cron` aceita uma string ou uma lista. Cada item vira uma linha. As linhas usam `flock` (não abre dois Playwright), `TZ=America/Sao_Paulo` e redirecionam para `data/cron.log`. Depois de editar `[schedule]`, rode `--install` de novo.
 
 O cron não consegue segurar o repouso: o `systemd-inhibit` pede senha interativa e, se falha, a busca nem começa. Quem impede o computador inativo de suspender é a unidade de usuário `linkedin-alert-awake` (bloqueio de `sleep` e `idle`). Fechar a tampa ainda pode suspender. No modo bateria, esse bloqueio impede o descanso automático.
 
@@ -118,7 +120,7 @@ A última linha de *Filtros* é a `search_url` inteira, com `origin`, `currentJo
 
 | Sintoma | O que fazer |
 |---|---|
-| Não chegou WhatsApp | Veja `data/cron.log` |
+| Não chegou WhatsApp | Veja `data/cron.log`. Fora de segunda a sábado, 08:00–20:00, a cron não dispara |
 | Busca sem vaga nova | O WhatsApp recebe “Não houve dados novos encontrados.” e o último registro do banco, marcado como busca anterior. O `--dry-run` só imprime isso |
 | Sessão expirada | `python -m linkedin_alert.login` (skill `renew-linkedin-session`) |
 | Falta vaga | Com `search_url`, edite essa URL. Sem ela, teste `recency` (`30m`, `1h`, `12h`, `24h`, `week`) antes de culpar o scraper |

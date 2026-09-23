@@ -8,7 +8,8 @@ alwaysApply: false
 
 - Pacote em `src/linkedin_alert/`. Entradas: `python -m linkedin_alert`, `.login`, `.cron`.
 - Type hints nos públicos. `logging` em vez de `print` (exceto progresso do login headed).
-- Settings só via `config.toml` + `.env` (`CALLMEBOT_APIKEY`). Não hardcodar filtros.
+- Settings só via `config.toml` + `.env` (`CALLMEBOT_APIKEY`). Não hardcodar filtros nem o horário da cron.
+- `[schedule].cron` é uma expressão ou uma lista. Cada item vira uma linha do crontab. A janela (segunda a sábado, 08:00–20:00) fica no `config.toml`, não no código.
 - Com `search_url` preenchida, usar essa string na busca e no WhatsApp. Não reconstruir a query.
 - Sem login LinkedIn por email/senha e sem burlar CAPTCHA/2FA.
 
