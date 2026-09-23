@@ -1,15 +1,15 @@
 # LinkedIn Alert → WhatsApp
 
-Monitor horário de vagas **Laravel remotas no Brasil**. Roda no seu usuário (venv + cron), reutiliza uma sessão do LinkedIn que você grava manualmente e avisa no WhatsApp via CallMeBot.
+Monitor horário de vagas no LinkedIn. Roda no seu usuário (venv + cron), reutiliza uma sessão que você grava manualmente e avisa no WhatsApp via CallMeBot.
 
-Para mudar filtros, telefone ou recorrência do cron, edite só o [`config.toml`](config.toml).
+Para mudar filtros, telefone ou recorrência do cron, edite só o [`config.toml`](config.toml). Com `search_url` preenchida, a busca e o alerta usam essa URL completa. Os outros campos de `[filters]` não remontam a query.
 
 Não usamos Docker neste projeto: o login interativo e o Playwright no host são mais simples para um cron pessoal.
 
 ## Avisos
 
 - Automatizar o LinkedIn pode violar os termos de uso e restringir a conta. A sessão é sua; o script não tenta burlar CAPTCHA/2FA.
-- O CallMeBot (terceiro) recebe título, empresa e link das vagas.
+- O CallMeBot (terceiro) recebe título, empresa, local, candidatos, data estimada de abertura, link da vaga e a URL do filtro.
 - O número no `config.toml` só é aceitável porque este repositório é **privado**.
 - Nunca commite `.env`, `storage_state.json` ou `data/`.
 
@@ -41,9 +41,10 @@ uv pip install -e ".[dev]" --python .venv/bin/python
 
 ### 2. CallMeBot
 
-1. No WhatsApp, adicione **+34 644 51 97 23** e envie: `I allow callmebot to send me messages`
-2. Copie a API key que o bot devolver
-3. `cp .env.example .env` e cole em `CALLMEBOT_APIKEY=`
+1. No WhatsApp, adicione **+34 623 80 11 90** aos contatos e envie exatamente: `I allow callmebot to send me messages`
+2. Espere a resposta `API Activated... Your APIKEY is ...`. Sem resposta em 2 minutos: tente `Recover APIKey` ou de novo em 24h (o bot muda de número; o atual está em https://www.callmebot.com/blog/free-api-whatsapp-messages/)
+3. Copie a API key que o bot devolver
+4. `cp .env.example .env` e cole em `CALLMEBOT_APIKEY=`
 
 ### 3. Dry-run (sem sessão)
 
@@ -96,16 +97,22 @@ Toda notificação começa pelos filtros:
 *Filtros*
 Palavra-chave: laravel
 País: Brasil
-Modalidade: remoto
-Recência: última hora
+Modalidade: qualquer
+Recência: desde 22/09/2026 07:11
+Salário: qualquer
+https://www.linkedin.com/jobs/search-results/?currentJobId=...&f_TPR=a1790071915-
 
-*2 vagas novas*
+*1 vaga nova*
 
-*1. Desenvolvedor Laravel Pleno*
-Empresa: Acme Tech
-Local: Brasil (Remoto)
-https://www.linkedin.com/jobs/view/4469829157
+*1. Analista de Sistemas Sênior (PHP)*
+Empresa: Locaweb
+Local: Brasil
+Candidatos: Mais de 100 pessoas clicaram em Candidate-se
+Aberta desde: 22/09/2026 18:42 (há 16 horas)
+https://www.linkedin.com/jobs/view/4468921714
 ```
+
+A última linha de *Filtros* é a `search_url` inteira, com `origin`, `currentJobId` e `f_TPR`. `Candidatos` é o texto do LinkedIn, não uma contagem própria. `Aberta desde` estima o instante a partir do “há N …” da página, no fuso `America/Sao_Paulo`, e grava esse texto no banco. Se a página não mostrar o dado, a linha vai como `não informado`.
 
 ## Operação
 
@@ -113,9 +120,20 @@ https://www.linkedin.com/jobs/view/4469829157
 |---|---|
 | Não chegou WhatsApp | Veja `data/cron.log` |
 | Sessão expirada | `python -m linkedin_alert.login` (skill `renew-linkedin-session`) |
-| Falta vaga | Teste `recency = "12h"` no `config.toml` antes de culpar o scraper |
-| Brasil + remoto incompleto | O LinkedIn mistura “worldwide” e híbrido; o bloco Filtros deixa isso explícito |
+| Falta vaga | Com `search_url`, edite essa URL. Sem ela, teste `recency` (`1h`, `12h`, `24h`, `week`) antes de culpar o scraper |
+| Resultado diferente do LinkedIn | A busca tem de ser a URL completa, inclusive `f_TPR=a…-`. Remontar a query troca o filtro |
 | Histórico | `data/jobs.db` — copie o arquivo se quiser backup |
+
+O mesmo `linkedin_id` não é enviado de novo. A linha nasce com `notified_at` vazio; depois do WhatsApp aceito, o campo é preenchido. Falha no CallMeBot deixa a vaga pendente. Vaga já gravada não ganha candidatos nem data numa busca seguinte.
+
+Consultar o banco, na raiz do projeto:
+
+```bash
+sqlite3 -header -column data/jobs.db \
+  "SELECT linkedin_id, title, applicants, opened_at, notified_at FROM jobs ORDER BY id DESC;"
+```
+
+Pendentes de envio: `WHERE notified_at IS NULL`. No console, `.schema jobs` lista as colunas (`applicants`, `opened_at`, `first_seen_at`, `notified_at`). Saia com `.quit`.
 
 Cookies duram dias/semanas até um checkpoint. Sem renovação automática.
 

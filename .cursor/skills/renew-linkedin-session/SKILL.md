@@ -19,7 +19,7 @@ python -m linkedin_alert.login
 
 3. The user signs in (and completes 2FA if prompted). Wait until `/feed` or cookie `li_at`.
 4. Confirm `storage_state.json` exists and is gitignored.
-5. Verify without WhatsApp:
+5. Verify without WhatsApp. Do not edit `search_url` or other filters while renewing the session. Dry-run opens that URL, inserts new rows in `data/jobs.db`, and prints the alert. It does not call CallMeBot and does not set `notified_at`.
 
 ```bash
 python -m linkedin_alert --dry-run

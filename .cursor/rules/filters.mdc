@@ -1,0 +1,28 @@
+---
+description: URL exata da busca LinkedIn e campos do alerta no WhatsApp
+globs: config.toml,src/linkedin_alert/config.py,src/linkedin_alert/linkedin.py,src/linkedin_alert/whatsapp.py,src/linkedin_alert/db.py
+alwaysApply: false
+---
+
+# Filtros e alerta
+
+Filtros só no `config.toml`. Com `search_url` preenchida, scraper e WhatsApp usam esse valor. `keywords`, `workplace`, `recency` e `salary` não entram na query; os rótulos da mensagem saem da URL.
+
+```toml
+# ❌ BAD — remonta e troca f_TPR=a1790071915- por r3600
+recency = "1h"
+
+# ✅ GOOD
+search_url = "https://www.linkedin.com/jobs/search-results/?...&f_TPR=a1790071915-"
+```
+
+Sem `search_url`, montar `https://www.linkedin.com/jobs/search/` com `keywords`, `geoId`, `f_TPR` e, se houver, `f_WT` e `f_SAL`.
+
+- `workplace`: `remote` → `f_WT=2`, `hybrid` → `3`, `onsite` → `1`, `any` → omite `f_WT`
+- `recency`: `1h` → `r3600`, `12h` → `r43200`, `24h` → `r86400`, `week` → `r604800`
+- `salary`: token cru do `f_SAL` (`f_SA_id_225001:272001`); vazio omite o parâmetro
+- `f_TPR=a{epoch}-` é “desde” esse instante em `America/Sao_Paulo`, não uma janela relativa
+
+Cada vaga no WhatsApp leva `Candidatos` e `Aberta desde`. O texto de candidatos é o do LinkedIn (“Mais de 100 pessoas clicaram em Candidate-se”, “Seja um dos primeiros…”). A data é `agora − há N`, gravada em `jobs.applicants` e `jobs.opened_at`. Sem dado na página: `não informado`.
+
+Não reenviar `linkedin_id` que já tem `notified_at`. Não preencher meta de vaga antiga no `INSERT OR IGNORE`.
