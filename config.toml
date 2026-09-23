@@ -1,0 +1,46 @@
+# =============================================================================
+# LinkedIn Alert — edite este arquivo para mudar filtros, WhatsApp e o cron.
+# Depois de mudar [schedule], rode:  python -m linkedin_alert.cron --print
+# (ou --install para gravar no crontab do usuário)
+# =============================================================================
+
+[filters]
+# Palavra-chave da busca no LinkedIn
+keywords = "laravel"
+
+# País (rótulo na mensagem do WhatsApp)
+country = "Brasil"
+# ID geográfico do LinkedIn (Brasil = 106057199)
+geo_id = "106057199"
+
+# Modalidade: remote | hybrid | onsite
+# remote → f_WT=2
+workplace = "remote"
+
+# Recência: 1h | 12h | 24h | week
+# 1h → f_TPR=r3600
+recency = "1h"
+
+[whatsapp]
+# Número com DDI, só dígitos (Brasil 55 + DDD + número)
+phone = "5551989030405"
+# A API key NÃO fica aqui — coloque em .env: CALLMEBOT_APIKEY=...
+
+[schedule]
+# Expressão cron: minuto hora dia mês dia-da-semana
+# "0 * * * *" = no minuto 0 de cada hora
+cron = "0 * * * *"
+# Texto livre, só para o README / --print
+description = "A cada 1 hora"
+# Fuso usado na linha do crontab (o f_TPR do LinkedIn é relativo a "agora")
+timezone = "America/Sao_Paulo"
+
+[paths]
+database = "data/jobs.db"
+storage_state = "storage_state.json"
+log = "data/cron.log"
+lock = "data/linkedin_alert.lock"
+
+[alerts]
+# Avisar no WhatsApp se a sessão do LinkedIn expirar
+notify_on_session_expired = true
