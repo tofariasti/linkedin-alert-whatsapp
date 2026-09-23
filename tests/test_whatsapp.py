@@ -4,6 +4,7 @@ from linkedin_alert.whatsapp import (
     MAX_MESSAGE_CHARS,
     format_filter_block,
     format_job_messages,
+    format_no_new_jobs,
     format_session_expired,
 )
 
@@ -49,6 +50,13 @@ def test_single_job_title(filters: Filters, sample_jobs: list[Job]) -> None:
     messages = format_job_messages(filters, sample_jobs[:1])
     assert "*1 vaga nova*" in messages[0]
     assert "vagas novas" not in messages[0]
+
+
+def test_no_new_jobs_message(filters: Filters) -> None:
+    text = format_no_new_jobs(filters)
+    assert text.startswith("*Filtros*")
+    assert "Não houve dados novos encontrados." in text
+    assert "https://www.linkedin.com/jobs/search/" in text
 
 
 def test_session_expired_starts_with_filters(filters: Filters) -> None:

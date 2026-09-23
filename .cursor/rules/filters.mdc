@@ -25,4 +25,4 @@ Sem `search_url`, montar `https://www.linkedin.com/jobs/search/` com `keywords`,
 
 Cada vaga no WhatsApp leva `Candidatos` e `Aberta desde`. O texto de candidatos é o do LinkedIn (“Mais de 100 pessoas clicaram em Candidate-se”, “Seja um dos primeiros…”). A data é `agora − há N`, gravada em `jobs.applicants` e `jobs.opened_at`. Sem dado na página: `não informado`.
 
-Não reenviar `linkedin_id` que já tem `notified_at`. Não preencher meta de vaga antiga no `INSERT OR IGNORE`.
+Não reenviar `linkedin_id` que já tem `notified_at`. Não preencher meta de vaga antiga no `INSERT OR IGNORE`. Busca sem vaga nova avisa no WhatsApp: “Não houve dados novos encontrados.” O `--dry-run` só imprime.

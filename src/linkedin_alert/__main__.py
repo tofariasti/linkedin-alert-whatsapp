@@ -10,6 +10,7 @@ from linkedin_alert.linkedin import SessionExpiredError, scrape_jobs
 from linkedin_alert.whatsapp import (
     WhatsAppError,
     format_job_messages,
+    format_no_new_jobs,
     format_session_expired,
     send_message,
     send_messages,
@@ -55,7 +56,7 @@ def main(argv: list[str] | None = None) -> int:
             )
             messages = format_job_messages(settings.filters, inserted)
             if not messages:
-                print("Nenhuma vaga nova no banco.")
+                print(format_no_new_jobs(settings.filters))
                 return 0
             for message in messages:
                 print(message)
@@ -64,6 +65,8 @@ def main(argv: list[str] | None = None) -> int:
 
         if not pending:
             logger.info("Nenhuma vaga nova para notificar")
+            if not _notify_no_new_jobs(settings):
+                return 1
             return 0
 
         messages = format_job_messages(settings.filters, pending)
@@ -78,6 +81,19 @@ def main(argv: list[str] | None = None) -> int:
         return 0
     finally:
         conn.close()
+
+
+def _notify_no_new_jobs(settings: Settings) -> bool:
+    try:
+        send_message(
+            settings.phone,
+            settings.api_key,
+            format_no_new_jobs(settings.filters),
+        )
+    except WhatsAppError:
+        logger.exception("Falha no CallMeBot ao avisar busca sem dados novos")
+        return False
+    return True
 
 
 def _notify_session_expired(settings: Settings) -> None:

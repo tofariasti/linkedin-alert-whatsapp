@@ -43,6 +43,14 @@ def format_job_block(job: Job, index: int) -> str:
     )
 
 
+def format_no_new_jobs(filters: Filters) -> str:
+    return (
+        f"{format_filter_block(filters)}\n\n"
+        "*LinkedIn Alert*\n"
+        "Não houve dados novos encontrados."
+    )
+
+
 def format_session_expired(filters: Filters) -> str:
     return (
         f"{format_filter_block(filters)}\n\n"
