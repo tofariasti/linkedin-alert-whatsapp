@@ -1,11 +1,15 @@
 from __future__ import annotations
 
 import logging
+from datetime import datetime
+from zoneinfo import ZoneInfo
 
 import requests
 
 from linkedin_alert.config import Filters, build_search_url
 from linkedin_alert.models import Job
+
+_SAO_PAULO = ZoneInfo("America/Sao_Paulo")
 
 logger = logging.getLogger(__name__)
 
@@ -43,12 +47,39 @@ def format_job_block(job: Job, index: int) -> str:
     )
 
 
-def format_no_new_jobs(filters: Filters) -> str:
-    return (
+def format_no_new_jobs(filters: Filters, previous: Job | None = None) -> str:
+    text = (
         f"{format_filter_block(filters)}\n\n"
         "*LinkedIn Alert*\n"
         "Não houve dados novos encontrados."
     )
+    if previous is None:
+        return text
+    return f"{text}\n\n{format_previous_job(previous)}"
+
+
+def format_previous_job(job: Job) -> str:
+    applicants = job.applicants or "não informado"
+    opened_at = job.opened_at or "não informado"
+    return (
+        "*Último registro (busca anterior)*\n"
+        f"*{job.title}*\n"
+        f"Empresa: {job.company}\n"
+        f"Local: {job.location}\n"
+        f"Candidatos: {applicants}\n"
+        f"Aberta desde: {opened_at}\n"
+        f"Encontrado em: {_format_seen_at(job.first_seen_at)}\n"
+        f"{job.url}"
+    )
+
+
+def _format_seen_at(value: str) -> str:
+    if not value:
+        return "não informado"
+    moment = datetime.fromisoformat(value)
+    if moment.tzinfo is None:
+        moment = moment.replace(tzinfo=ZoneInfo("UTC"))
+    return moment.astimezone(_SAO_PAULO).strftime("%d/%m/%Y %H:%M")
 
 
 def format_session_expired(filters: Filters) -> str:

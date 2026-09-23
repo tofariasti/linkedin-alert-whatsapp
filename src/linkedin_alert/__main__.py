@@ -5,8 +5,15 @@ import logging
 import sys
 
 from linkedin_alert.config import Settings, load_settings
-from linkedin_alert.db import connect, mark_notified, pending_jobs, upsert_jobs
+from linkedin_alert.db import (
+    connect,
+    latest_job,
+    mark_notified,
+    pending_jobs,
+    upsert_jobs,
+)
 from linkedin_alert.linkedin import SessionExpiredError, scrape_jobs
+from linkedin_alert.models import Job
 from linkedin_alert.whatsapp import (
     WhatsAppError,
     format_job_messages,
@@ -56,7 +63,7 @@ def main(argv: list[str] | None = None) -> int:
             )
             messages = format_job_messages(settings.filters, inserted)
             if not messages:
-                print(format_no_new_jobs(settings.filters))
+                print(format_no_new_jobs(settings.filters, latest_job(conn)))
                 return 0
             for message in messages:
                 print(message)
@@ -65,7 +72,7 @@ def main(argv: list[str] | None = None) -> int:
 
         if not pending:
             logger.info("Nenhuma vaga nova para notificar")
-            if not _notify_no_new_jobs(settings):
+            if not _notify_no_new_jobs(settings, latest_job(conn)):
                 return 1
             return 0
 
@@ -83,12 +90,12 @@ def main(argv: list[str] | None = None) -> int:
         conn.close()
 
 
-def _notify_no_new_jobs(settings: Settings) -> bool:
+def _notify_no_new_jobs(settings: Settings, previous: Job | None) -> bool:
     try:
         send_message(
             settings.phone,
             settings.api_key,
-            format_no_new_jobs(settings.filters),
+            format_no_new_jobs(settings.filters, previous),
         )
     except WhatsAppError:
         logger.exception("Falha no CallMeBot ao avisar busca sem dados novos")

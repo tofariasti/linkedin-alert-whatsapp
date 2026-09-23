@@ -10,3 +10,4 @@ class Job:
     url: str
     applicants: str = ""
     opened_at: str = ""
+    first_seen_at: str = ""

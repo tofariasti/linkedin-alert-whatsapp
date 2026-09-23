@@ -27,7 +27,7 @@ ruff check . && pytest
 - `workplace = any` ou vazio em `salary` omite `f_WT` / `f_SAL`
 - Recência relativa: `30m` → `f_TPR=r1800`, `1h` → `r3600`, `12h` → `r43200`, `24h` → `r86400`, `week` → `r604800`
 - O alerta manda a URL do filtro, candidatos e “aberta desde”. A data é estimada do “há N …” do LinkedIn, em `America/Sao_Paulo`
-- SQLite `data/jobs.db`: uma linha por `linkedin_id`. WhatsApp de vaga só sai com `notified_at` vazio; depois do envio o campo é preenchido. Sem vaga nova, avisa: “Não houve dados novos encontrados.” `INSERT OR IGNORE` não atualiza vaga já vista
+- SQLite `data/jobs.db`: uma linha por `linkedin_id`. WhatsApp de vaga só sai com `notified_at` vazio; depois do envio o campo é preenchido. Sem vaga nova, avisa “Não houve dados novos encontrados.” e inclui o último registro do banco, marcado como busca anterior. `INSERT OR IGNORE` não atualiza vaga já vista
 
 ## Convenções
 

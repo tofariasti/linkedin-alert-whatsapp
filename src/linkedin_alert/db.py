@@ -70,18 +70,23 @@ def pending_jobs(conn: sqlite3.Connection) -> list[Job]:
         ORDER BY id
         """
     ).fetchall()
-    return [
-        Job(
-            linkedin_id=row["linkedin_id"],
-            title=row["title"],
-            company=row["company"],
-            location=row["location"],
-            url=row["url"],
-            applicants=row["applicants"],
-            opened_at=row["opened_at"],
-        )
-        for row in rows
-    ]
+    return [_job_from_row(row) for row in rows]
+
+
+def latest_job(conn: sqlite3.Connection) -> Job | None:
+    """Most recently stored job, from an earlier search."""
+    row = conn.execute(
+        """
+        SELECT linkedin_id, title, company, location, url,
+               applicants, opened_at, first_seen_at
+        FROM jobs
+        ORDER BY id DESC
+        LIMIT 1
+        """
+    ).fetchone()
+    if row is None:
+        return None
+    return _job_from_row(row)
 
 
 def mark_notified(conn: sqlite3.Connection, linkedin_ids: list[str]) -> None:
@@ -93,6 +98,20 @@ def mark_notified(conn: sqlite3.Connection, linkedin_ids: list[str]) -> None:
         [(now, job_id) for job_id in linkedin_ids],
     )
     conn.commit()
+
+
+def _job_from_row(row: sqlite3.Row) -> Job:
+    keys = row.keys()
+    return Job(
+        linkedin_id=row["linkedin_id"],
+        title=row["title"],
+        company=row["company"],
+        location=row["location"],
+        url=row["url"],
+        applicants=row["applicants"],
+        opened_at=row["opened_at"],
+        first_seen_at=row["first_seen_at"] if "first_seen_at" in keys else "",
+    )
 
 
 def _ensure_job_columns(conn: sqlite3.Connection) -> None:

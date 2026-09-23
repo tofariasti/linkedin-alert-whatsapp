@@ -1,7 +1,13 @@
 import sqlite3
 from pathlib import Path
 
-from linkedin_alert.db import connect, mark_notified, pending_jobs, upsert_jobs
+from linkedin_alert.db import (
+    connect,
+    latest_job,
+    mark_notified,
+    pending_jobs,
+    upsert_jobs,
+)
 from linkedin_alert.models import Job
 
 
@@ -67,6 +73,17 @@ def test_connect_adds_meta_columns_to_existing_db(db_path: Path) -> None:
     columns = {row[1] for row in conn.execute("PRAGMA table_info(jobs)")}
     assert "applicants" in columns
     assert "opened_at" in columns
+    conn.close()
+
+
+def test_latest_job_is_the_last_inserted(db_path: Path, sample_jobs: list[Job]) -> None:
+    conn = connect(db_path)
+    assert latest_job(conn) is None
+    upsert_jobs(conn, sample_jobs)
+    latest = latest_job(conn)
+    assert latest is not None
+    assert latest.linkedin_id == sample_jobs[-1].linkedin_id
+    assert latest.first_seen_at
     conn.close()
 
 

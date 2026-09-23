@@ -64,7 +64,27 @@ def test_no_new_jobs_message(filters: Filters) -> None:
     text = format_no_new_jobs(filters)
     assert text.startswith("*Filtros*")
     assert "Não houve dados novos encontrados." in text
+    assert "busca anterior" not in text
     assert "https://www.linkedin.com/jobs/search/" in text
+
+
+def test_no_new_jobs_includes_previous_record(filters: Filters) -> None:
+    previous = Job(
+        linkedin_id="4468921714",
+        title="Analista de Sistemas Sênior (PHP)",
+        company="Locaweb",
+        location="Brasil",
+        url="https://www.linkedin.com/jobs/view/4468921714",
+        applicants="Mais de 100 pessoas clicaram em Candidate-se",
+        opened_at="22/09/2026 18:42 (há 16 horas)",
+        first_seen_at="2026-09-23T13:05:11+00:00",
+    )
+    text = format_no_new_jobs(filters, previous)
+    assert "Não houve dados novos encontrados." in text
+    assert "*Último registro (busca anterior)*" in text
+    assert "Analista de Sistemas Sênior (PHP)" in text
+    assert "Encontrado em: 23/09/2026 10:05" in text
+    assert previous.url in text
 
 
 def test_session_expired_starts_with_filters(filters: Filters) -> None:
