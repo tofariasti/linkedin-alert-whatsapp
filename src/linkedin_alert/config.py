@@ -110,7 +110,7 @@ class Settings:
     filters: Filters
     phone: str
     api_key: str
-    cron: str
+    cron: tuple[str, ...]
     schedule_description: str
     timezone: str
     database: Path
@@ -172,7 +172,7 @@ def load_settings(root: Path | None = None) -> Settings:
         ),
         phone=str(raw["whatsapp"]["phone"]).replace(" ", ""),
         api_key=api_key,
-        cron=schedule["cron"],
+        cron=_cron_expressions(schedule["cron"]),
         schedule_description=schedule.get("description", ""),
         timezone=schedule.get("timezone", "America/Sao_Paulo"),
         database=_resolve(root, paths["database"]),
@@ -184,6 +184,21 @@ def load_settings(root: Path | None = None) -> Settings:
         ),
         root=root,
     )
+
+
+def _cron_expressions(value: object) -> tuple[str, ...]:
+    if isinstance(value, str):
+        raw_lines = [value]
+    elif isinstance(value, list):
+        raw_lines = [str(item) for item in value]
+    else:
+        msg = "cron inválido: use uma expressão ou uma lista"
+        raise ValueError(msg)
+    lines = tuple(line.strip() for line in raw_lines if line.strip())
+    if not lines:
+        msg = "cron vazio"
+        raise ValueError(msg)
+    return lines
 
 
 def _search_url(value: object) -> str:

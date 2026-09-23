@@ -15,15 +15,20 @@ MARKER_START = "# linkedin-alert-whatsapp start"
 MARKER_END = "# linkedin-alert-whatsapp end"
 
 
-def cron_line(settings: Settings, python: Path | None = None) -> str:
+def cron_line(
+    settings: Settings,
+    python: Path | None = None,
+    expression: str | None = None,
+) -> str:
     python = python or Path(sys.executable)
     flock = shutil.which("flock") or "flock"
     settings.lock.parent.mkdir(parents=True, exist_ok=True)
     settings.log.parent.mkdir(parents=True, exist_ok=True)
+    schedule = expression if expression is not None else settings.cron[0]
     # Cron has no polkit agent. systemd-inhibit there exits before the search
     # and the WhatsApp is never sent. The idle lock is a user unit, not this line.
     return (
-        f"{settings.cron} "
+        f"{schedule} "
         f"TZ={settings.timezone} "
         f"{flock} -n {settings.lock} "
         f"{python} -m linkedin_alert "
@@ -32,11 +37,11 @@ def cron_line(settings: Settings, python: Path | None = None) -> str:
 
 
 def format_crontab_block(settings: Settings, python: Path | None = None) -> str:
-    line = cron_line(settings, python)
+    lines = "\n".join(cron_line(settings, python, expr) for expr in settings.cron)
     return (
         f"{MARKER_START}\n"
         f"# {settings.schedule_description}\n"
-        f"{line}\n"
+        f"{lines}\n"
         f"{MARKER_END}\n"
     )
 
@@ -85,7 +90,7 @@ def _read_crontab() -> str:
 
 def main(argv: list[str] | None = None) -> int:
     logging.basicConfig(level=logging.INFO, format="%(levelname)s %(message)s")
-    parser = argparse.ArgumentParser(description="Gera ou instala a linha do cron")
+    parser = argparse.ArgumentParser(description="Gera ou instala o bloco do cron")
     group = parser.add_mutually_exclusive_group(required=True)
     group.add_argument("--print", action="store_true", dest="do_print")
     group.add_argument("--install", action="store_true")

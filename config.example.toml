@@ -39,10 +39,10 @@ phone = "5511999999999"
 
 [schedule]
 # Expressão cron: minuto hora dia mês dia-da-semana
-# "*/30 * * * *" = a cada 30 minutos
-cron = "*/30 * * * *"
+# 1-6 = segunda a sábado. A lista cobre :00 e :30 até 19:30, e 20:00.
+cron = ["*/30 8-19 * * 1-6", "0 20 * * 1-6"]
 # Texto livre, só para o README / --print
-description = "A cada 30 minutos"
+description = "A cada 30 minutos, de segunda a sábado, das 08:00 às 20:00"
 # Fuso usado na linha do crontab (o f_TPR do LinkedIn é relativo a "agora")
 timezone = "America/Sao_Paulo"
 
