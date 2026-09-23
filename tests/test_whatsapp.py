@@ -17,11 +17,32 @@ def test_filter_block_comes_first(filters: Filters, sample_jobs: list[Job]) -> N
     assert "País: Brasil" in text
     assert "Modalidade: remoto" in text
     assert "Recência: última hora" in text
+    assert (
+        "https://www.linkedin.com/jobs/search/"
+        "?keywords=laravel&f_TPR=r3600&geoId=106057199&f_WT=2"
+    ) in text
     assert "*2 vagas novas*" in text
     assert "*1. Desenvolvedor Laravel Pleno*" in text
     assert "Empresa: Acme Tech" in text
+    assert "Candidatos: não informado" in text
+    assert "Aberta desde: não informado" in text
     assert "https://www.linkedin.com/jobs/view/4469829157" in text
     assert "*2. Backend Laravel — Pagamentos*" in text
+
+
+def test_job_block_includes_applicants_and_opened_at(filters: Filters) -> None:
+    job = Job(
+        linkedin_id="4468921714",
+        title="Analista de Sistemas Sênior (PHP)",
+        company="Locaweb",
+        location="Brasil",
+        url="https://www.linkedin.com/jobs/view/4468921714",
+        applicants="Mais de 100 pessoas clicaram em Candidate-se",
+        opened_at="22/09/2026 18:39 (há 16 horas)",
+    )
+    text = format_job_messages(filters, [job])[0]
+    assert "Candidatos: Mais de 100 pessoas clicaram em Candidate-se" in text
+    assert "Aberta desde: 22/09/2026 18:39 (há 16 horas)" in text
 
 
 def test_single_job_title(filters: Filters, sample_jobs: list[Job]) -> None:
@@ -62,5 +83,8 @@ def test_filter_block_labels(filters: Filters) -> None:
         "Palavra-chave: laravel\n"
         "País: Brasil\n"
         "Modalidade: remoto\n"
-        "Recência: última hora"
+        "Recência: última hora\n"
+        "Salário: qualquer\n"
+        "https://www.linkedin.com/jobs/search/"
+        "?keywords=laravel&f_TPR=r3600&geoId=106057199&f_WT=2"
     )
