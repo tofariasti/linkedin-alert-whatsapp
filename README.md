@@ -85,9 +85,9 @@ python -m linkedin_alert.cron --print    # só mostra a linha
 python -m linkedin_alert.cron --install  # grava no crontab do usuário
 ```
 
-A linha usa `flock` (não abre dois Playwright), `TZ=America/Sao_Paulo` e redireciona para `data/cron.log`.
+A linha usa `systemd-inhibit` (a busca em andamento não é suspensa por inatividade), `flock` (não abre dois Playwright), `TZ=America/Sao_Paulo` e redireciona para `data/cron.log`.
 
-O PC precisa estar **ligado e acordado**. Cron em laptop suspenso não dispara. Alternativa futura (não implementada): timer `systemd --user` com `Persistent=true`.
+O bloco do crontab também segura um inibidor de repouso desde o boot. Com ele ativo, o computador inativo não suspende sozinho, e a busca das 30 minutos continua. Fechar a tampa ainda pode suspender. No modo bateria, isso impede o descanso automático.
 
 ## Mensagem no WhatsApp
 

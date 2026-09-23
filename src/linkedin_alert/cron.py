@@ -15,6 +15,14 @@ MARKER_START = "# linkedin-alert-whatsapp start"
 MARKER_END = "# linkedin-alert-whatsapp end"
 
 
+def _inhibit_prefix() -> str:
+    inhibit = shutil.which("systemd-inhibit") or "systemd-inhibit"
+    return (
+        f"{inhibit} --what=idle:sleep --who=linkedin-alert "
+        "--why=busca-de-vagas --mode=block"
+    )
+
+
 def cron_line(settings: Settings, python: Path | None = None) -> str:
     python = python or Path(sys.executable)
     flock = shutil.which("flock") or "flock"
@@ -23,15 +31,29 @@ def cron_line(settings: Settings, python: Path | None = None) -> str:
     return (
         f"{settings.cron} "
         f"TZ={settings.timezone} "
+        f"{_inhibit_prefix()} "
         f"{flock} -n {settings.lock} "
         f"{python} -m linkedin_alert "
         f">> {settings.log} 2>&1"
     )
 
 
+def awake_line() -> str:
+    """Hold an idle/sleep inhibitor so inactivity does not suspend the machine."""
+    return f"@reboot {_inhibit_prefix()} sleep infinity"
+
+
 def format_crontab_block(settings: Settings, python: Path | None = None) -> str:
     line = cron_line(settings, python)
-    return f"{MARKER_START}\n# {settings.schedule_description}\n{line}\n{MARKER_END}\n"
+    awake = awake_line()
+    return (
+        f"{MARKER_START}\n"
+        "# Mantém o computador acordado quando está inativo\n"
+        f"{awake}\n"
+        f"# {settings.schedule_description}\n"
+        f"{line}\n"
+        f"{MARKER_END}\n"
+    )
 
 
 def upsert_crontab(block: str) -> None:

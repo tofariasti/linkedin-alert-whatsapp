@@ -22,6 +22,9 @@ def test_cron_line_uses_flock_and_log(tmp_path: Path) -> None:
     line = cron_line(settings, python=Path("/opt/venv/bin/python"))
     assert line.startswith("0 * * * * ")
     assert "TZ=America/Sao_Paulo" in line
+    assert "systemd-inhibit" in line
+    assert "--what=idle:sleep" in line
+    assert "--mode=block" in line
     assert "flock -n" in line
     assert str(settings.lock) in line
     assert "/opt/venv/bin/python -m linkedin_alert" in line
@@ -29,4 +32,6 @@ def test_cron_line_uses_flock_and_log(tmp_path: Path) -> None:
 
     block = format_crontab_block(settings, python=Path("/opt/venv/bin/python"))
     assert "# linkedin-alert-whatsapp start" in block
+    assert "@reboot " in block
+    assert "sleep infinity" in block
     assert "# A cada 1 hora" in block
