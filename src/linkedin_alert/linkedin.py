@@ -2,7 +2,9 @@ from __future__ import annotations
 
 import logging
 import re
+from datetime import datetime, timedelta
 from pathlib import Path
+from zoneinfo import ZoneInfo
 
 from playwright.sync_api import Browser, Page, sync_playwright
 from playwright.sync_api import TimeoutError as PlaywrightTimeoutError
@@ -14,6 +16,44 @@ logger = logging.getLogger(__name__)
 
 JOB_ID_RE = re.compile(r"/jobs/view/(\d+)")
 EXPIRED_MARKERS = ("/login", "/checkpoint", "/uas/login", "authwall")
+_SAO_PAULO = ZoneInfo("America/Sao_Paulo")
+_RELATIVE_RE = re.compile(
+    r"há\s+(\d+)\s+(minuto|minutos|hora|horas|dia|dias|semana|semanas|m[eê]s|meses)",
+    re.IGNORECASE,
+)
+_UNIT_SECONDS = {
+    "minuto": 60,
+    "minutos": 60,
+    "hora": 3600,
+    "horas": 3600,
+    "dia": 86400,
+    "dias": 86400,
+    "semana": 604800,
+    "semanas": 604800,
+    "mes": 2_592_000,
+    "meses": 2_592_000,
+}
+
+LISTING_READY_JS = """
+() => [...document.querySelectorAll("p, span")].some((node) => {
+  const text = (node.innerText || "").replace(/\\s+/g, " ").trim();
+  return text.length > 0 && text.length <= 180 && text.includes("·")
+    && /há\\s+\\d+/i.test(text);
+})
+"""
+
+LISTING_TEXT_JS = """
+() => {
+  let best = "";
+  for (const node of document.querySelectorAll("p, span")) {
+    const text = (node.innerText || "").replace(/\\s+/g, " ").trim();
+    if (!text || text.length > 180 || !text.includes("·")) continue;
+    if (!/há\\s+\\d+/i.test(text)) continue;
+    if (!best || text.length < best.length) best = text;
+  }
+  return best;
+}
+"""
 
 EXTRACT_JOBS_JS = """
 () => {
@@ -99,24 +139,84 @@ def _scrape_with_browser(browser: Browser, storage_state: Path, url: str) -> lis
         return []
 
     raw_jobs = page.evaluate(EXTRACT_JOBS_JS)
-    context.close()
-
     jobs: list[Job] = []
     for item in raw_jobs:
         job_id = str(item.get("id") or "")
         if not JOB_ID_RE.search(f"/jobs/view/{job_id}"):
             continue
+        url = item.get("url") or f"https://www.linkedin.com/jobs/view/{job_id}"
+        applicants, opened_at = _listing_meta(page, url)
         jobs.append(
             Job(
                 linkedin_id=job_id,
                 title=(item.get("title") or "Vaga sem título").strip(),
                 company=(item.get("company") or "Empresa não informada").strip(),
                 location=(item.get("location") or "Local não informado").strip(),
-                url=item.get("url") or f"https://www.linkedin.com/jobs/view/{job_id}",
+                url=url,
+                applicants=applicants,
+                opened_at=opened_at,
             )
         )
+    context.close()
     logger.info("Extraídas %s vagas da primeira página", len(jobs))
     return jobs
+
+
+def parse_listing_meta(text: str, now: datetime) -> tuple[str, str]:
+    """Applicants phrase and an estimated open date from the LinkedIn header."""
+    applicants = ""
+    posted = ""
+    for part in (piece.strip() for piece in text.split("·")):
+        if not part:
+            continue
+        if not posted and _RELATIVE_RE.search(part):
+            posted = part
+        elif _is_applicant_text(part):
+            applicants = part
+    if not posted:
+        return applicants, ""
+    opened = _opened_label(posted, now)
+    return applicants, opened or posted
+
+
+def _listing_meta(page: Page, url: str) -> tuple[str, str]:
+    page.goto(url, wait_until="domcontentloaded", timeout=60_000)
+    _assert_session(page)
+    try:
+        page.wait_for_function(LISTING_READY_JS, timeout=12_000)
+    except PlaywrightTimeoutError:
+        logger.info("Vaga sem data ou candidaturas: %s", url)
+        return "", ""
+    text = page.evaluate(LISTING_TEXT_JS)
+    return parse_listing_meta(text or "", datetime.now(_SAO_PAULO))
+
+
+def _is_applicant_text(part: str) -> bool:
+    low = part.casefold()
+    if "candidatura simplificada" in low or low.startswith("avaliando"):
+        return False
+    if "primeir" in low and "candidat" in low:
+        return True
+    if not re.search(r"\d", part):
+        return False
+    return any(
+        token in low
+        for token in ("candidat", "applicant", "pessoas clicaram", "clicked apply")
+    )
+
+
+def _opened_label(posted: str, now: datetime) -> str:
+    match = _RELATIVE_RE.search(posted)
+    if not match:
+        return posted
+    amount = int(match.group(1))
+    unit = match.group(2).casefold().replace("ê", "e")
+    seconds = _UNIT_SECONDS.get(unit)
+    if seconds is None:
+        return posted
+    moment = now.astimezone(_SAO_PAULO) - timedelta(seconds=amount * seconds)
+    stamp = moment.strftime("%d/%m/%Y %H:%M")
+    return f"{stamp} ({posted})"
 
 
 def _assert_session(page: Page) -> None:
