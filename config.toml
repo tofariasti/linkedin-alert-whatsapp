@@ -17,11 +17,11 @@ geo_id = "106057199"
 # remote → f_WT=2; any → não envia f_WT
 workplace = "any"
 
-# Recência: 1h | 12h | 24h | week
-# 1h → f_TPR=r3600 | 12h → f_TPR=r43200 | 24h → f_TPR=r86400 | week → f_TPR=r604800
-recency = "1h"
+# Recência: 30m | 1h | 12h | 24h | week
+# 30m → f_TPR=r1800 | 1h → f_TPR=r3600 | 12h → f_TPR=r43200 | 24h → f_TPR=r86400 | week → f_TPR=r604800
+recency = "30m"
 # URL completa usada no filtro:
-# https://www.linkedin.com/jobs/search-results/?currentJobId=4468921714&keywords=laravel&origin=SEMANTIC_SEARCH_JOB_ALERT_IN_APP_NOTIFICATION&originToLandingJobPostings=4468921714%2C4470662296%2C4468939639&geoId=106057199&f_TPR=a1790071915-
+# https://www.linkedin.com/jobs/search-results/?currentJobId=4468921714&keywords=laravel&origin=SEMANTIC_SEARCH_JOB_ALERT_IN_APP_NOTIFICATION&originToLandingJobPostings=4468921714%2C4470662296%2C4468939639&geoId=106057199&f_TPR=r1800
 
 # Salário: token do f_SAL, ou vazio para não filtrar.
 # Ignorado quando search_url está preenchida.
@@ -29,8 +29,8 @@ recency = "1h"
 salary = ""
 
 # URL exata da busca. Scraper e WhatsApp usam este valor, sem remontar a query.
-# f_TPR=a1790071915- → desde 22/09/2026 07:11 (America/Sao_Paulo)
-search_url = "https://www.linkedin.com/jobs/search-results/?currentJobId=4468921714&keywords=laravel&origin=SEMANTIC_SEARCH_JOB_ALERT_IN_APP_NOTIFICATION&originToLandingJobPostings=4468921714%2C4470662296%2C4468939639&geoId=106057199&f_TPR=a1790071915-"
+# f_TPR=r1800 → últimos 30 minutos
+search_url = "https://www.linkedin.com/jobs/search-results/?currentJobId=4468921714&keywords=laravel&origin=SEMANTIC_SEARCH_JOB_ALERT_IN_APP_NOTIFICATION&originToLandingJobPostings=4468921714%2C4470662296%2C4468939639&geoId=106057199&f_TPR=r1800"
 
 [whatsapp]
 # Número com DDI, só dígitos (Brasil 55 + DDD + número)
@@ -39,10 +39,10 @@ phone = "555189030405"
 
 [schedule]
 # Expressão cron: minuto hora dia mês dia-da-semana
-# "0 * * * *" = no minuto 0 de cada hora
-cron = "0 * * * *"
+# "*/30 * * * *" = a cada 30 minutos
+cron = "*/30 * * * *"
 # Texto livre, só para o README / --print
-description = "A cada 1 hora"
+description = "A cada 30 minutos"
 # Fuso usado na linha do crontab (o f_TPR do LinkedIn é relativo a "agora")
 timezone = "America/Sao_Paulo"
 

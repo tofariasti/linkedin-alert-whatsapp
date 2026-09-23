@@ -1,6 +1,6 @@
 # LinkedIn Alert → WhatsApp
 
-Monitor horário de vagas no LinkedIn. Roda no seu usuário (venv + cron), reutiliza uma sessão que você grava manualmente e avisa no WhatsApp via CallMeBot.
+Monitor de vagas no LinkedIn, a cada 30 minutos. Roda no seu usuário (venv + cron), reutiliza uma sessão que você grava manualmente e avisa no WhatsApp via CallMeBot.
 
 Para mudar filtros, telefone ou recorrência do cron, edite só o [`config.toml`](config.toml). Com `search_url` preenchida, a busca e o alerta usam essa URL completa. Os outros campos de `[filters]` não remontam a query.
 
@@ -121,7 +121,7 @@ A última linha de *Filtros* é a `search_url` inteira, com `origin`, `currentJo
 | Não chegou WhatsApp | Veja `data/cron.log` |
 | Busca sem vaga nova | O WhatsApp recebe “Não houve dados novos encontrados.” O `--dry-run` só imprime isso |
 | Sessão expirada | `python -m linkedin_alert.login` (skill `renew-linkedin-session`) |
-| Falta vaga | Com `search_url`, edite essa URL. Sem ela, teste `recency` (`1h`, `12h`, `24h`, `week`) antes de culpar o scraper |
+| Falta vaga | Com `search_url`, edite essa URL. Sem ela, teste `recency` (`30m`, `1h`, `12h`, `24h`, `week`) antes de culpar o scraper |
 | Resultado diferente do LinkedIn | A busca tem de ser a URL completa, inclusive `f_TPR=a…-`. Remontar a query troca o filtro |
 | Histórico | `data/jobs.db` — copie o arquivo se quiser backup |
 

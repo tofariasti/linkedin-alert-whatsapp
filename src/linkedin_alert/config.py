@@ -19,6 +19,7 @@ WORKPLACE_TO_F_WT = {
 }
 
 RECENCY_TO_TPR = {
+    "30m": "r1800",
     "1h": "r3600",
     "12h": "r43200",
     "24h": "r86400",
@@ -33,6 +34,7 @@ WORKPLACE_LABELS = {
 }
 
 RECENCY_LABELS = {
+    "30m": "últimos 30 minutos",
     "1h": "última hora",
     "12h": "últimas 12 horas",
     "24h": "últimas 24 horas",
@@ -151,7 +153,7 @@ def load_settings(root: Path | None = None) -> Settings:
         msg = f"workplace inválido: {workplace!r} (use remote, hybrid, onsite ou any)"
         raise ValueError(msg)
     if recency not in RECENCY_TO_TPR:
-        msg = f"recency inválido: {recency!r} (use 1h, 12h, 24h ou week)"
+        msg = f"recency inválido: {recency!r} (use 30m, 1h, 12h, 24h ou week)"
         raise ValueError(msg)
 
     paths = raw["paths"]

@@ -19,7 +19,7 @@ search_url = "https://www.linkedin.com/jobs/search-results/?...&f_TPR=a179007191
 Sem `search_url`, montar `https://www.linkedin.com/jobs/search/` com `keywords`, `geoId`, `f_TPR` e, se houver, `f_WT` e `f_SAL`.
 
 - `workplace`: `remote` → `f_WT=2`, `hybrid` → `3`, `onsite` → `1`, `any` → omite `f_WT`
-- `recency`: `1h` → `r3600`, `12h` → `r43200`, `24h` → `r86400`, `week` → `r604800`
+- `recency`: `30m` → `r1800`, `1h` → `r3600`, `12h` → `r43200`, `24h` → `r86400`, `week` → `r604800`
 - `salary`: token cru do `f_SAL` (`f_SA_id_225001:272001`); vazio omite o parâmetro
 - `f_TPR=a{epoch}-` é “desde” esse instante em `America/Sao_Paulo`, não uma janela relativa
 

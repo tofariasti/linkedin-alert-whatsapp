@@ -21,6 +21,19 @@ def test_build_search_url_maps_filters() -> None:
     assert "f_WT=2" in url
 
 
+def test_recency_30m_maps_to_half_hour() -> None:
+    filters = Filters(
+        keywords="laravel",
+        country="Brasil",
+        geo_id="106057199",
+        workplace="any",
+        recency="30m",
+    )
+    assert filters.f_tpr == "r1800"
+    assert filters.recency_label == "últimos 30 minutos"
+    assert "f_TPR=r1800" in build_search_url(filters)
+
+
 def test_build_search_url_omits_workplace_when_any() -> None:
     filters = Filters(
         keywords="laravel",
