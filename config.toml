@@ -34,7 +34,7 @@ search_url = "https://www.linkedin.com/jobs/search-results/?currentJobId=4468921
 
 [whatsapp]
 # Número com DDI, só dígitos (Brasil 55 + DDD + número)
-phone = "5551989030405"
+phone = "555189030405"
 # A API key NÃO fica aqui — coloque em .env: CALLMEBOT_APIKEY=...
 
 [schedule]
