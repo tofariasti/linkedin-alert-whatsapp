@@ -101,7 +101,7 @@ workplace = "hybrid"
 recency = "12h"
 
 [whatsapp]
-phone = "5551989030405"
+phone = "5511999999999"
 
 [schedule]
 cron = "0 * * * *"
@@ -123,7 +123,7 @@ notify_on_session_expired = true
     assert settings.filters.keywords == "django"
     assert settings.filters.f_wt == "3"
     assert settings.filters.f_tpr == "r43200"
-    assert settings.phone == "5551989030405"
+    assert settings.phone == "5511999999999"
     assert settings.database == tmp_path / "data" / "jobs.db"
 
 

@@ -7,7 +7,7 @@ from linkedin_alert.cron import cron_line, format_crontab_block
 def test_cron_line_uses_flock_and_log(tmp_path: Path) -> None:
     settings = Settings(
         filters=Filters("laravel", "Brasil", "106057199", "remote", "1h"),
-        phone="5551989030405",
+        phone="5511999999999",
         api_key="",
         cron="0 * * * *",
         schedule_description="A cada 1 hora",

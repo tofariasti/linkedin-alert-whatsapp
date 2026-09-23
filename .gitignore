@@ -6,6 +6,7 @@ __pycache__/
 dist/
 build/
 .env
+config.toml
 storage_state.json
 data/
 *.pyc

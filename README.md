@@ -2,7 +2,7 @@
 
 Monitor de vagas no LinkedIn, a cada 30 minutos. Roda no seu usuário (venv + cron), reutiliza uma sessão que você grava manualmente e avisa no WhatsApp via CallMeBot.
 
-Para mudar filtros, telefone ou recorrência do cron, edite só o [`config.toml`](config.toml). Com `search_url` preenchida, a busca e o alerta usam essa URL completa. Os outros campos de `[filters]` não remontam a query.
+Para mudar filtros, telefone ou recorrência do cron, edite só o `config.toml` (não vai para o git). O modelo é [`config.example.toml`](config.example.toml). Com `search_url` preenchida, a busca e o alerta usam essa URL completa. Os outros campos de `[filters]` não remontam a query.
 
 Não usamos Docker neste projeto: o login interativo e o Playwright no host são mais simples para um cron pessoal.
 
@@ -10,8 +10,7 @@ Não usamos Docker neste projeto: o login interativo e o Playwright no host são
 
 - Automatizar o LinkedIn pode violar os termos de uso e restringir a conta. A sessão é sua; o script não tenta burlar CAPTCHA/2FA.
 - O CallMeBot (terceiro) recebe título, empresa, local, candidatos, data estimada de abertura, link da vaga e a URL do filtro.
-- O número no `config.toml` só é aceitável porque este repositório é **privado**.
-- Nunca commite `.env`, `storage_state.json` ou `data/`.
+- Nunca commite `.env`, `config.toml`, `storage_state.json` ou `data/`. O telefone fica só na cópia local.
 
 ## Pré-requisitos
 
@@ -45,6 +44,7 @@ uv pip install -e ".[dev]" --python .venv/bin/python
 2. Espere a resposta `API Activated... Your APIKEY is ...`. Sem resposta em 2 minutos: tente `Recover APIKey` ou de novo em 24h (o bot muda de número; o atual está em https://www.callmebot.com/blog/free-api-whatsapp-messages/)
 3. Copie a API key que o bot devolver
 4. `cp .env.example .env` e cole em `CALLMEBOT_APIKEY=`
+5. `cp config.example.toml config.toml` e coloque o telefone em `phone`
 
 ### 3. Dry-run (sem sessão)
 

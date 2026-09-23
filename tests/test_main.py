@@ -32,7 +32,7 @@ def test_no_new_jobs_sends_whatsapp_notice(tmp_path: Path) -> None:
 
     settings = MagicMock()
     settings.database = tmp_path / "jobs.db"
-    settings.phone = "555189030405"
+    settings.phone = "5511999999999"
     settings.api_key = "key"
     settings.filters = Filters(
         keywords="laravel",
@@ -63,7 +63,7 @@ def test_no_new_jobs_includes_last_stored_job(
 
     settings = MagicMock()
     settings.database = tmp_path / "jobs.db"
-    settings.phone = "555189030405"
+    settings.phone = "5511999999999"
     settings.api_key = "key"
     settings.filters = Filters(
         keywords="laravel",
