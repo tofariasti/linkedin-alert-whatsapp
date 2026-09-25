@@ -13,6 +13,8 @@ def test_dry_run_prints_only_inserted_jobs(
     from linkedin_alert import __main__ as main_mod
 
     settings = MagicMock()
+    settings.log_dir = tmp_path / "logs"
+    settings.timezone = "America/Sao_Paulo"
     settings.database = tmp_path / "jobs.db"
     settings.filters.keywords = "laravel"
     settings.filters.country = "Brasil"
@@ -31,6 +33,8 @@ def test_no_new_jobs_sends_whatsapp_notice(tmp_path: Path) -> None:
     from linkedin_alert import __main__ as main_mod
 
     settings = MagicMock()
+    settings.log_dir = tmp_path / "logs"
+    settings.timezone = "America/Sao_Paulo"
     settings.database = tmp_path / "jobs.db"
     settings.phone = "5511999999999"
     settings.api_key = "key"
@@ -62,6 +66,8 @@ def test_no_new_jobs_includes_last_stored_job(
     from linkedin_alert import __main__ as main_mod
 
     settings = MagicMock()
+    settings.log_dir = tmp_path / "logs"
+    settings.timezone = "America/Sao_Paulo"
     settings.database = tmp_path / "jobs.db"
     settings.phone = "5511999999999"
     settings.api_key = "key"
@@ -93,6 +99,8 @@ def test_dry_run_without_new_jobs_does_not_notify(tmp_path: Path) -> None:
     from linkedin_alert import __main__ as main_mod
 
     settings = MagicMock()
+    settings.log_dir = tmp_path / "logs"
+    settings.timezone = "America/Sao_Paulo"
     settings.database = tmp_path / "jobs.db"
     settings.filters = Filters(
         keywords="laravel",
@@ -116,6 +124,8 @@ def test_missing_session_exits_without_whatsapp(tmp_path: Path) -> None:
     from linkedin_alert import __main__ as main_mod
 
     settings = MagicMock()
+    settings.log_dir = tmp_path / "logs"
+    settings.timezone = "America/Sao_Paulo"
     settings.notify_on_session_expired = True
     settings.database = tmp_path / "jobs.db"
 

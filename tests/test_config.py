@@ -111,7 +111,7 @@ timezone = "America/Sao_Paulo"
 [paths]
 database = "data/jobs.db"
 storage_state = "storage_state.json"
-log = "data/cron.log"
+log_dir = "logs"
 lock = "data/linkedin_alert.lock"
 
 [alerts]
@@ -143,7 +143,7 @@ cron = "* * * * *"
 [paths]
 database = "a"
 storage_state = "b"
-log = "c"
+log_dir = "c"
 lock = "d"
 """,
         encoding="utf-8",
@@ -169,7 +169,7 @@ cron = "* * * * *"
 [paths]
 database = "a"
 storage_state = "b"
-log = "c"
+log_dir = "c"
 lock = "d"
 """,
         encoding="utf-8",

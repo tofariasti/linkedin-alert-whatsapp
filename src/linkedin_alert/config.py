@@ -115,7 +115,7 @@ class Settings:
     timezone: str
     database: Path
     storage_state: Path
-    log: Path
+    log_dir: Path
     lock: Path
     notify_on_session_expired: bool
     root: Path
@@ -177,7 +177,7 @@ def load_settings(root: Path | None = None) -> Settings:
         timezone=schedule.get("timezone", "America/Sao_Paulo"),
         database=_resolve(root, paths["database"]),
         storage_state=_resolve(root, paths["storage_state"]),
-        log=_resolve(root, paths["log"]),
+        log_dir=_resolve(root, paths["log_dir"]),
         lock=_resolve(root, paths["lock"]),
         notify_on_session_expired=bool(
             raw.get("alerts", {}).get("notify_on_session_expired", True)

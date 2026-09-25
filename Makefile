@@ -8,7 +8,7 @@ export PLAYWRIGHT_BROWSERS_PATH := $(HOME)/.cache/ms-playwright
 help:
 	@echo "make run           busca e envia o alerta"
 	@echo "make dry-run       busca e grava no SQLite, sem WhatsApp"
-	@echo "make log           final de data/cron.log"
+	@echo "make log           final do log de hoje"
 	@echo "make db            últimas vagas em data/jobs.db"
 	@echo "make login         abre o LinkedIn e grava storage_state.json"
 	@echo "make cron          mostra o bloco do crontab"
@@ -26,7 +26,9 @@ dry-run:
 	$(PYTHON) -m linkedin_alert --dry-run
 
 log:
-	tail -n 40 data/cron.log
+	@f=$$(ls -1 logs/[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9].log 2>/dev/null | sort | tail -n 1); \
+	if [ -z "$$f" ]; then echo "nenhum log em logs/"; exit 1; fi; \
+	tail -n 40 "$$f"
 
 db:
 	sqlite3 -header -column data/jobs.db \

@@ -9,6 +9,7 @@ build/
 config.toml
 storage_state.json
 data/
+logs/
 *.pyc
 .coverage
 htmlcov/

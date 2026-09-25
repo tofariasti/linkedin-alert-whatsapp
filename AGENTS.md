@@ -35,6 +35,6 @@ ruff check . && pytest
 - src-layout, type hints, `logging` (não `print`, exceto no login headed)
 - Sem login por senha, sem bypass de CAPTCHA/2FA
 - Conventional Commits, um concern por commit
-- Nunca commitar `.env`, `storage_state.json`, `data/jobs.db`, `data/cron.log`
+- Nunca commitar `.env`, `storage_state.json`, `data/jobs.db`, `logs/`
 
 Rules: `.cursor/rules/` (`python`, `filters`, `secrets`, `commits`). Skill de sessão: `.cursor/skills/renew-linkedin-session/`.

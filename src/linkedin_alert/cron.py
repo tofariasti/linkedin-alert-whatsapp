@@ -23,16 +23,17 @@ def cron_line(
     python = python or Path(sys.executable)
     flock = shutil.which("flock") or "flock"
     settings.lock.parent.mkdir(parents=True, exist_ok=True)
-    settings.log.parent.mkdir(parents=True, exist_ok=True)
+    settings.log_dir.mkdir(parents=True, exist_ok=True)
     schedule = expression if expression is not None else settings.cron[0]
     # Cron has no polkit agent. systemd-inhibit there exits before the search
     # and the WhatsApp is never sent. The idle lock is a user unit, not this line.
+    # % must be escaped: crontab turns a bare % into a newline.
     return (
         f"{schedule} "
         f"TZ={settings.timezone} "
         f"{flock} -n {settings.lock} "
         f"{python} -m linkedin_alert "
-        f">> {settings.log} 2>&1"
+        f">> {settings.log_dir}/$(date +\\%F).log 2>&1"
     )
 
 

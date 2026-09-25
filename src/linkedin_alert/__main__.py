@@ -13,6 +13,7 @@ from linkedin_alert.db import (
     upsert_jobs,
 )
 from linkedin_alert.linkedin import SessionExpiredError, scrape_jobs
+from linkedin_alert.logstore import configure_logging, log_run_end, log_run_start
 from linkedin_alert.models import Job
 from linkedin_alert.whatsapp import (
     WhatsAppError,
@@ -35,17 +36,21 @@ def main(argv: list[str] | None = None) -> int:
     )
     args = parser.parse_args(argv)
 
-    logging.basicConfig(
-        level=logging.INFO,
-        format="%(asctime)s %(levelname)s %(name)s: %(message)s",
-    )
     settings = load_settings()
+    configure_logging(settings.log_dir, settings.timezone)
+    log_run_start()
+    try:
+        return _run(settings, dry_run=args.dry_run)
+    finally:
+        log_run_end()
 
+
+def _run(settings: Settings, *, dry_run: bool) -> int:
     try:
         jobs = scrape_jobs(settings)
     except SessionExpiredError as exc:
         logger.error("%s", exc)
-        if settings.notify_on_session_expired and not args.dry_run:
+        if settings.notify_on_session_expired and not dry_run:
             _notify_session_expired(settings)
         return 1
 
@@ -54,7 +59,7 @@ def main(argv: list[str] | None = None) -> int:
         inserted = upsert_jobs(conn, jobs)
         pending = pending_jobs(conn)
 
-        if args.dry_run:
+        if dry_run:
             logger.info(
                 "Dry-run: %s extraídas, %s novas no banco, %s pendentes de WhatsApp",
                 len(jobs),

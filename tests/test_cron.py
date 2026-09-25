@@ -14,7 +14,7 @@ def test_cron_line_uses_flock_and_log(tmp_path: Path) -> None:
         timezone="America/Sao_Paulo",
         database=tmp_path / "jobs.db",
         storage_state=tmp_path / "storage_state.json",
-        log=tmp_path / "cron.log",
+        log_dir=tmp_path / "logs",
         lock=tmp_path / "lock",
         notify_on_session_expired=True,
         root=tmp_path,
@@ -26,7 +26,7 @@ def test_cron_line_uses_flock_and_log(tmp_path: Path) -> None:
     assert "flock -n" in line
     assert str(settings.lock) in line
     assert "/opt/venv/bin/python -m linkedin_alert" in line
-    assert f">> {settings.log} 2>&1" in line
+    assert f">> {settings.log_dir}/$(date +\\%F).log 2>&1" in line
 
     block = format_crontab_block(settings, python=Path("/opt/venv/bin/python"))
     assert "# linkedin-alert-whatsapp start" in block
@@ -47,7 +47,7 @@ def test_crontab_block_writes_one_line_per_expression(tmp_path: Path) -> None:
         timezone="America/Sao_Paulo",
         database=tmp_path / "jobs.db",
         storage_state=tmp_path / "storage_state.json",
-        log=tmp_path / "cron.log",
+        log_dir=tmp_path / "logs",
         lock=tmp_path / "lock",
         notify_on_session_expired=True,
         root=tmp_path,

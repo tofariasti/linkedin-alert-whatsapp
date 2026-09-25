@@ -49,7 +49,8 @@ timezone = "America/Sao_Paulo"
 [paths]
 database = "data/jobs.db"
 storage_state = "storage_state.json"
-log = "data/cron.log"
+# Um arquivo por dia (AAAA-MM-DD.log). O programa guarda só os 3 mais novos.
+log_dir = "logs"
 lock = "data/linkedin_alert.lock"
 
 [alerts]
